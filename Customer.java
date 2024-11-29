@@ -6,6 +6,10 @@ public class Customer extends User {
         this.bookedSessions = new ArrayList<>();
     }
 
+    public ArrayList<Session> getBookedSessions(){
+        return this.bookedSessions;
+    }
+
     public void bookSession(Session session) {
         if (session.getMachine().isAvailable()) {
             session.markTaken(); // Mark machine as in-use

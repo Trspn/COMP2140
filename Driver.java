@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Scanner;
 import java.io.File;
@@ -7,28 +8,37 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate; 
 import java.time.LocalDateTime; 
 import java.time.LocalTime;
 
 public class Driver {
-    private User user;
-    private ArrayList<User> users;
+    private ArrayList<Customer> users;
     private ArrayList<Session> sessions = new ArrayList<>();
     private ArrayList<Machine> machines = new ArrayList<>();
+    private ArrayList<Administrator> administrators = new ArrayList<>();
 
     private static final String USERS_FILE = "users.dat";
     private static final String SESSIONS_FILE = "sessions.dat";
     private static final String MACHINES_FILE = "machines.dat";
+
+    Administrator a1 = new Administrator(620161521, "Troy Spooner","troyspooner25@gmail.com","ts123");
+    Administrator a2 = new Administrator( 620161521, "Aalyia Cato","aalyiacatowork@gmail.com","ac123");
+    
 
 
 
     public Driver() {
         this.users = new ArrayList<>();  // Initialize the users ArrayList
         loadSessions();
+        loadData();
+        
     }
 
     public void loadSessions(){
+        administrators.add(a1);
+        administrators.add(a2);
         for (int i = 0; i < 8; i++) {
             String type = (i < 4) ? "Washer" : "Dryer";  // First 4 are washers, next 4 are dryers
             int machineID = i + 1;  // Machine IDs ranging from 1 to 8
@@ -45,11 +55,18 @@ public class Driver {
             int endMinutes = endTime.getHour() * 60 + endTime.getMinute();
 
             for (Machine machine : machines) {
-                // Create a session for this machine and this time slot, then add to the sessions list
-                sessions.add(new Session(machine, startMinutes, endMinutes));
+                Calendar calendar = Calendar.getInstance();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                for (int i = 0; i < 7; i++){
+                    String date = (dateFormat.format(calendar.getTime()));
+                    sessions.add(new Session(machine, startMinutes, endMinutes, date));
+                    calendar.add(Calendar.DATE, 1);
+                }
+                
+                // Create a session for this machine and this time slot, then add to the sessions list  
             }
-            
-        }
+              // Increment date by 1 day
+        }  
     }
 
     public ArrayList<Session> getSessions(){
@@ -60,71 +77,14 @@ public class Driver {
         return this.machines;
     }
 
-    public ArrayList<User> getUsers(){
+    public ArrayList<Customer> getUsers(){
         return this.users;
     }
 
-    public void authenticateUser() {
-        Scanner input = new Scanner(System.in);
-        System.out.println("C - Create an Account | L - Login");
-        String choice = input.next();
-
-        if (choice.equalsIgnoreCase("C")) {
-            // Create new account
-            System.out.println("Enter your name:");
-            String name = input.nextLine();
-            System.out.println("Enter your email:");
-            String email = input.nextLine();
-            System.out.println("Enter your password:");
-            String password = input.nextLine();
-            
-            // Generate a new userID (simple approach here)
-            int userID = users.size() + 1;
-
-            // Create a new customer and add it to the list of users
-            Customer newCustomer = new Customer(userID, name, email, password);
-            users.add(newCustomer);
-            System.out.println("Account created successfully!");
-            executeUserAction(newCustomer);
-
-        } else if (choice.equalsIgnoreCase("L")) {
-            // Login
-            System.out.println("Enter your user ID:");
-            int userID = input.nextInt();
-            System.out.println("Enter your password:");
-            String password = input.next();
-
-            // Check if the user ID and password match any existing user
-            boolean found = false;
-            for (User existingUser : users) {
-                if (existingUser.getUserID() == userID && existingUser.getUserPassword().equals(password)) {
-                    found = true;
-                    user = existingUser;  // Set the user to the logged-in user
-                    break;
-                }
-            }
-
-            if (found) {
-                System.out.println("Login successful!");
-                // After successful login, pass the user to their interface
-                executeUserAction(user);
-            } else {
-                System.out.println("Invalid user ID or password.");
-            }
-        } else {
-            System.out.println("Invalid choice. Please select 'C' to create an account or 'L' to login.");
-        }
-        input.close();
+    public ArrayList<Administrator> getAdmins(){
+        return this.administrators;
     }
     
-    private void launchUserInterface(User user) {
-        // Create and show the Swing-based interface
-        new DriverInterface(this).createAndShowGUI();
-    }
-
-    public void executeUserAction(User user) {
-        launchUserInterface(user);
-    }
     public void saveData() {
         try {
             // Saving Users list to file
@@ -158,7 +118,7 @@ public class Driver {
             if (userFile.exists()) {
                 FileInputStream userInStream = new FileInputStream(USERS_FILE);
                 ObjectInputStream userObjInStream = new ObjectInputStream(userInStream);
-                users = (ArrayList<User>) userObjInStream.readObject();
+                users = (ArrayList<Customer>) userObjInStream.readObject();
                 userObjInStream.close();
             }
 
@@ -190,11 +150,16 @@ public class Driver {
     
     public static void main(String[] args) {
         Driver driver = new Driver();
-        driver.loadData();
-        System.out.println(driver.getUsers());
-        driver.getUsers().clear();;
-        driver.saveData();
-        driver.loadData();
-        System.out.println(driver.getUsers());  
+        for (Session session : driver.getSessions()) {
+            // Check if session matches selected machine, date, and start hour
+            if (session.getMachine().toString().equals("Washer 3")){
+                System.out.println(session);
+                 // Found the session, return it
+            }
+        }
+        for (Customer customer :driver.getUsers()){
+            System.out.println(customer.getBookedSessions());
+        }
+        
     }
 } 

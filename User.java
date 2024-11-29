@@ -45,4 +45,13 @@ public abstract class User implements Serializable{
     public void receiveNotification(Notification notification) {
         notifications.add(notification);
     }
+    
+    public String toString() {
+        return "User{" +
+               "userID=" + userID +
+               ", name='" + name + '\'' +
+               ", email='" + email + '\'' +
+               ", password='" + password + '\'' +
+               '}';
+    }
 }

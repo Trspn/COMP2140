@@ -8,13 +8,19 @@ public class Session implements Serializable {
     private int startTime;
     private int endTime;
     private boolean status;
+    private String date;
 
-    public Session(Machine machine, int startTime, int endTime) {
+    public Session(Machine machine, int startTime, int endTime, String date) {
         this.sessionID = nextSessionID++;
         this.machine = machine;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.date = date;
         this.status = true;
+    }
+
+    public String getDate() {
+        return date;
     }
 
     public String getStartTime() {
@@ -66,6 +72,6 @@ public class Session implements Serializable {
     }
 
     public String toString() { 
-        return "Session{" + "sessionID=" + sessionID + ", machine=" + machine + ", startTime='" + getStartTime() + '\'' + ", endTime='" + getEndTime() + '\'' + ", status=" + status + '}';
+        return "sessionID=" + sessionID + ",  " + machine + ",  " + getStartTime() + " - " + getEndTime()  + ", " + date;
     }
 }
